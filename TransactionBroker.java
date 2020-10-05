@@ -1,14 +1,16 @@
 import java.text.DecimalFormat;
 import java.util.*;
+import java.lang.*;
 
 public class TransactionBroker{
     private static double balance = 500d;
     private static int penaltyCounter = 0;
+    private static double balancePenalty = 20;
     private static DecimalFormat x = new DecimalFormat("$###,###,###.00");
 
-    public static boolean isValidDouble(String str){
+    public static boolean isValidDouble(String token){
         try {
-            Double.parseDouble(str);
+            Double.parseDouble(token);
             return true;
         } catch (NumberFormatException s){
             return false;
@@ -46,47 +48,67 @@ public class TransactionBroker{
                 return (op1 % op2);
             }
             else if (operator.equalsIgnoreCase("pow")){
-                return 0;//exponentiate(op1, op2);
+                return exponentiate(op1, op2);
             }
         } 
             return 0;      
-    } 
-       // public static operationFormat(double op1, String operator, double op2){
-        
-        // public static double exponentiate(double base, double exponent) {
-        //     if (operator.equalsIgnoreCase("pow")){
-        //         return(Math.pow(op1,op2));  
-        //     }
-        // }
+    }  
+    public static double exponentiate(double base, double exponent) {
+                return (Math.pow(base,exponent));  
+        }
     private static double parseToken(String token) {
         if (isValidDouble(token)){
             return Double.parseDouble(token);
-        }
-            // else if (isValidOperator(token)){
-            //     return token;
-            // }
-        return 0;        
+    }
+            return 0;        
     }
     public static void main(String[]args){
         for (int i = 0; i < args.length; i++){
             String token = args[i];
+            String nextToken = "";
+            String nextNextToken = "";
+            if ((i+1 < args.length-1) || (i+2 < args.length-2)){
+                nextToken = args[i+1];
+                nextNextToken = args[i+2];
+            }
             double tokenTransaction = parseToken(token);
+            double nextNextTokenTransaction = parseToken(nextNextToken);
+            if (isValidDouble(token) && isValidOperator(nextToken) && isValidDouble(nextNextToken)){
+                tokenTransaction = operation(tokenTransaction, nextNextTokenTransaction, nextToken);
+                i+=2; 
+            }
+            else if (isValidDouble(token) && isValidOperator(nextToken) && !isValidDouble(nextNextToken)){
+                Error();
+            }
             if ((balance >= 500) && (balance + tokenTransaction < 500)){
                 balance += tokenTransaction;
+                System.out.println("Your balance: " + x.format(balance));
                 System.out.println("Your last transaction lowered your balance to " + x.format(balance));
-                penalty(tokenTransaction, penaltyCounter);
+                penalty();
                 System.out.println("Your balance: " + x.format(balance));
             }
             else {
                 balance += tokenTransaction;
                 System.out.println("Your balance: " + x.format(balance));
             }
+            
         }
+        finalBalance();
     }
-    public static void penalty(double moneyTransaction, int penaltyCounter) {
-        double balancePenalty = 20;
+    public static void penalty() {
         balance -= balancePenalty;
         penaltyCounter++;
-        System.out.println("You have been charge a low balance penalty of " + x.format(balancePenalty)); 
-    }    
+        System.out.println("You have been charge a low-balance penalty of " + x.format(balancePenalty));
+      //  System.out.println(penaltyCounter);
+    }  
+    public static void finalBalance(){
+        double penaltySum = penaltyCounter * balancePenalty;
+        System.out.println("********************");
+        System.out.println("Your final balance: " + x.format(balance));
+        System.out.println("The total you were charged in penalties: " + x.format(penaltySum));
+    }
+    public static void Error(){
+        System.out.println("The mod operator must be preceded by, and followed by, numeric operands ");
+        System.exit(0);
+    }
 }
