@@ -6,7 +6,7 @@ public class TransactionBroker{
     private static double balance = 500d;
     private static int penaltyCounter = 0;
     private static double balancePenalty = 20;
-    private static DecimalFormat x = new DecimalFormat("$###,###,###.00");
+    private static DecimalFormat x = new DecimalFormat("$###,###,###.0#");
 
     public static boolean isValidDouble(String token){
         try {
@@ -60,25 +60,31 @@ public class TransactionBroker{
         if (isValidDouble(token)){
             return Double.parseDouble(token);
     }
-            return 0;        
+            return 0;       
     }
     public static void main(String[]args){
         for (int i = 0; i < args.length; i++){
             String token = args[i];
             String nextToken = "";
             String nextNextToken = "";
-            if ((i+1 < args.length-1) || (i+2 < args.length-2)){
+            if ((i+1 < args.length-1) && (i+2 < args.length-2)){
                 nextToken = args[i+1];
                 nextNextToken = args[i+2];
             }
             double tokenTransaction = parseToken(token);
             double nextNextTokenTransaction = parseToken(nextNextToken);
+            if (!isValidDouble(token) && isValidOperator(token)){
+                error(); 
+            }
+            else if (!isValidDouble(token) && !isValidOperator(token)){
+                opError();
+            }
             if (isValidDouble(token) && isValidOperator(nextToken) && isValidDouble(nextNextToken)){
                 tokenTransaction = operation(tokenTransaction, nextNextTokenTransaction, nextToken);
                 i+=2; 
             }
             else if (isValidDouble(token) && isValidOperator(nextToken) && !isValidDouble(nextNextToken)){
-                Error();
+                error();
             }
             if ((balance >= 500) && (balance + tokenTransaction < 500)){
                 balance += tokenTransaction;
@@ -91,14 +97,13 @@ public class TransactionBroker{
                 balance += tokenTransaction;
                 System.out.println("Your balance: " + x.format(balance));
             }
-            
         }
         finalBalance();
     }
     public static void penalty() {
         balance -= balancePenalty;
         penaltyCounter++;
-        System.out.println("You have been charge a low-balance penalty of " + x.format(balancePenalty));
+        System.out.println("You have been charged a low-balance penalty of " + x.format(balancePenalty));
       //  System.out.println(penaltyCounter);
     }  
     public static void finalBalance(){
@@ -107,8 +112,12 @@ public class TransactionBroker{
         System.out.println("Your final balance: " + x.format(balance));
         System.out.println("The total you were charged in penalties: " + x.format(penaltySum));
     }
-    public static void Error(){
-        System.out.println("The mod operator must be preceded by, and followed by, numeric operands ");
+    public static void error(){
+        System.out.println("The mod operator must be preceded by, and followed by, numeric operands");
+        System.exit(0);
+    }
+    public static void opError(){
+        System.out.println("That is not a valid operator and the mod operator must be preceded by, and followed by, numeric operands");
         System.exit(0);
     }
 }
