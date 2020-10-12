@@ -67,24 +67,26 @@ public class TransactionBroker{
             String token = args[i];
             String nextToken = "";
             String nextNextToken = "";
-            if ((i+1 < args.length-1) && (i+2 < args.length-2)){
+            if (i+1 <= args.length-1){
                 nextToken = args[i+1];
+            }
+            if (i+2 <= args.length-1){
                 nextNextToken = args[i+2];
             }
             double tokenTransaction = parseToken(token);
             double nextNextTokenTransaction = parseToken(nextNextToken);
             if (!isValidDouble(token) && isValidOperator(token)){
-                error(); 
+                error(token); 
             }
             else if (!isValidDouble(token) && !isValidOperator(token)){
-                opError();
+                opError(token);
             }
             if (isValidDouble(token) && isValidOperator(nextToken) && isValidDouble(nextNextToken)){
                 tokenTransaction = operation(tokenTransaction, nextNextTokenTransaction, nextToken);
                 i+=2; 
             }
             else if (isValidDouble(token) && isValidOperator(nextToken) && !isValidDouble(nextNextToken)){
-                error();
+                error(nextToken);
             }
             if ((balance >= 500) && (balance + tokenTransaction < 500)){
                 balance += tokenTransaction;
@@ -104,7 +106,6 @@ public class TransactionBroker{
         balance -= balancePenalty;
         penaltyCounter++;
         System.out.println("You have been charged a low-balance penalty of " + x.format(balancePenalty));
-      //  System.out.println(penaltyCounter);
     }  
     public static void finalBalance(){
         double penaltySum = penaltyCounter * balancePenalty;
@@ -112,12 +113,12 @@ public class TransactionBroker{
         System.out.println("Your final balance: " + x.format(balance));
         System.out.println("The total you were charged in penalties: " + x.format(penaltySum));
     }
-    public static void error(){
-        System.out.println("The mod operator must be preceded by, and followed by, numeric operands");
+    public static void error(String op){
+        System.out.println("The " + op + " operator must be preceded by, and followed by, numeric operands");
         System.exit(0);
     }
-    public static void opError(){
-        System.out.println("That is not a valid operator and the mod operator must be preceded by, and followed by, numeric operands");
+    public static void opError(String op){
+        System.out.println(op + " is not a valid operator");
         System.exit(0);
     }
 }
